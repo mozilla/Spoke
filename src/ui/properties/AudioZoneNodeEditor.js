@@ -6,6 +6,13 @@ import BooleanInput from "../inputs/BooleanInput";
 import { DiceD6 } from "styled-icons/fa-solid/DiceD6";
 import AudioParamsProperties from "./AudioParamsProperties";
 import { SourceType } from "../../editor/objects/AudioParams";
+import SelectInput from "../inputs/SelectInput";
+import { AudioZoneShape } from "../../editor/nodes/AudioZoneNode";
+
+export const AudioZoneShapeOptions = Object.keys(AudioZoneShape).map(k => ({
+  label: k,
+  value: AudioZoneShape[k]
+}));
 
 export default class AudioZoneNodeEditor extends Component {
   static propTypes = {
@@ -36,6 +43,10 @@ export default class AudioZoneNodeEditor extends Component {
 
   onChangeOutIn = value => {
     this.props.editor.setPropertySelected("outIn", value);
+  };
+
+  onChangeShape = value => {
+    this.props.editor.setPropertySelected("shape", value);
   };
 
   componentDidMount() {
@@ -71,6 +82,9 @@ export default class AudioZoneNodeEditor extends Component {
           info="If enabled this audio zone audio parameters will be applied to audios outside it when the listener is inside"
         >
           <BooleanInput value={node.outIn} onChange={this.onChangeOutIn} />
+        </InputGroup>
+        <InputGroup name="Shape" info="Shape of the Audio Zone.">
+          <SelectInput options={AudioZoneShapeOptions} value={node.shape} onChange={this.onChangeShape} />
         </InputGroup>
         <AudioParamsProperties sourceType={SourceType.AUDIO_ZONE} {...this.props} />
       </NodeEditor>

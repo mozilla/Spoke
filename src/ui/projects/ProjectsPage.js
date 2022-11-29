@@ -1,5 +1,6 @@
 import React, { Component } from "react";
 import PropTypes from "prop-types";
+import Modal from "react-modal";
 import configs from "../../configs";
 import { withApi } from "../contexts/ApiContext";
 import NavBar from "../navigation/NavBar";
@@ -18,6 +19,7 @@ import { Link } from "react-router-dom";
 import LatestUpdate from "../whats-new/LatestUpdate";
 import { connectMenu, ContextMenu, MenuItem } from "../layout/ContextMenu";
 import styled from "styled-components";
+import ConfirmDialog from "../dialogs/ConfirmDialog";
 
 export const ProjectsSection = styled.section`
   padding-bottom: 100px;
@@ -87,7 +89,9 @@ class ProjectsPage extends Component {
       scenes: [],
       loading: isAuthenticated,
       isAuthenticated,
-      error: null
+      error: null,
+      DialogComponent: null,
+      dialogProps: {}
     };
   }
 
@@ -124,7 +128,35 @@ class ProjectsPage extends Component {
     }
   }
 
-  onDeleteProject = project => {
+  showDialog = (DialogComponent, dialogProps = {}) => {
+    this.setState({
+      DialogComponent,
+      dialogProps
+    });
+  };
+
+  hideDialog = () => {
+    this.setState({
+      DialogComponent: null,
+      dialogProps: {}
+    });
+  };
+
+  onDeleteProject = async project => {
+    const confirm = await new Promise(resolve => {
+      this.showDialog(ConfirmDialog, {
+        title: "Delete Project",
+        message: `Warning! You are about to delete "${project.name}". Are you sure you wish to continue?`,
+        onConfirm: () => resolve(true),
+        onCancel: () => resolve(false),
+        cancelLabel: "Cancel",
+        confirmLabel: `Delete "${project.name}"`
+      });
+    });
+
+    this.hideDialog();
+    if (!confirm) return;
+
     this.props.api
       .deleteProject(project.project_id)
       .then(() => this.setState({ projects: this.state.projects.filter(p => p.project_id !== project.project_id) }))
@@ -142,7 +174,7 @@ class ProjectsPage extends Component {
   ProjectContextMenu = connectMenu(contextMenuId)(this.renderContextMenu);
 
   render() {
-    const { error, loading, projects, scenes, isAuthenticated } = this.state;
+    const { DialogComponent, dialogProps, error, loading, projects, scenes, isAuthenticated } = this.state;
 
     const ProjectContextMenu = this.ProjectContextMenu;
 
@@ -192,6 +224,18 @@ class ProjectsPage extends Component {
                     />
                   )}
                 </ProjectGridContent>
+                <Modal
+                  ariaHideApp={false}
+                  isOpen={!!DialogComponent}
+                  onRequestClose={this.hideDialog}
+                  shouldCloseOnOverlayClick={true}
+                  className="Modal"
+                  overlayClassName="Overlay"
+                >
+                  {DialogComponent && (
+                    <DialogComponent onConfirm={this.hideDialog} onCancel={this.hideDialog} {...dialogProps} />
+                  )}
+                </Modal>
               </ProjectGridContainer>
             </ProjectsContainer>
           </ProjectsSection>

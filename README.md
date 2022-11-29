@@ -11,6 +11,11 @@
 
 **[Spoke Documentation](https://hubs.mozilla.com/docs/spoke-creating-projects.html)**
 
+## Deploying custom client for Hubs Cloud
+
+If you are deploying a custom client, copy your .ret.credentials file from your Hubs folder to this directory. If you do not have one yet, from your Hubs directory run `npm run login` and move the resulting credentials to your Spoke directory. You should then be able to run `npm run deploy` to deploy your custom Spoke.
+
+
 ## Features
 
 :telescope: **Discover**: Explore images, videos, and 3D models from around the web, all without opening up a new tab. With media integrations from Sketchfab and Google Poly, you'll be on your way to creating a scene in no time.

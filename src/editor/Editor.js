@@ -424,7 +424,11 @@ export default class Editor extends EventEmitter {
       }
 
       this.remapNodeRefsInComponents(json.nodes, nodeDefs, uuidToIndexMap);
-      this.remapNodeRefsInComponents(json.materials, nodeDefs, uuidToIndexMap);
+
+      // Account for scenes that don't contain any geometry/materials.
+      if (json.materials !== undefined) {
+        this.remapNodeRefsInComponents(json.materials, nodeDefs, uuidToIndexMap);
+      }
     }
 
     if (!json.extensions) {

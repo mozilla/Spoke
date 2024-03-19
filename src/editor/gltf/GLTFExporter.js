@@ -1588,6 +1588,9 @@ class GLTFExporter {
       });
 
       pending.push(pendingBinChunk);
+    } else {
+      const totalByteLength = GLB_HEADER_BYTES + jsonChunkPrefix.byteLength + jsonChunk.byteLength;
+      headerView.setUint32(8, totalByteLength, true);
     }
 
     await Promise.all(pending);

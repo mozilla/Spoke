@@ -36,6 +36,7 @@
     "integration-tests": "concurrently --success \"first\" --kill-others \"ava ./test/integration\" \"yarn test-server\"",
     "update-test-snapshots": "concurrently --success \"first\" --kill-others \"ava -u\" \"yarn test-server\"",
     "storybook": "start-storybook",
+    "deploy": "node -r esm -r @babel/register ./scripts/deploy.js",
     "deploy-storybook": "storybook-to-ghpages"
   },
   "esm": {
@@ -102,6 +103,7 @@
     "recharts": "^1.8.5",
     "styled-components": "4.4.0",
     "styled-icons": "^8.4.2",
+    "tar": "^6.1.11",
     "three": "https://github.com/MozillaReality/three.js.git#0f9b0024725f0dd917caa54c2934a4ba1fc12c4f",
     "three-mesh-bvh": "^0.1.4",
     "troika-three-text": "^0.44.0",

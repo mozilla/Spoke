@@ -10,6 +10,7 @@ example/imported/
 .certs/
 certs/
 .env
+.ret.credentials
 release/spoke-linux
 release/spoke-macos
 release/spoke-win.exe

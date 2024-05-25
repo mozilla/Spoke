@@ -963,9 +963,13 @@ export default class Project extends EventEmitter {
         onConfirm: () => {
           this.emit("project-published");
           hideDialog();
+          if (screenshotUrl) {
+            URL.revokeObjectURL(screenshotUrl);
+          }
         }
       });
-    } finally {
+    } catch (ex) {
+      console.error(ex);
       if (screenshotUrl) {
         URL.revokeObjectURL(screenshotUrl);
       }

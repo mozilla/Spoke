@@ -36,7 +36,7 @@ export async function generateVideoFileThumbnail(file, width, height, background
   const video = document.createElement("video");
   await new Promise((resolve, reject) => {
     video.src = url;
-    video.onloadeddata = resolve;
+    video.oncanplay = resolve;
     video.onerror = reject;
   });
   URL.revokeObjectURL(url);

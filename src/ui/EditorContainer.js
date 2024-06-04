@@ -42,6 +42,7 @@ import defaultTemplateUrl from "./../assets/templates/crater.spoke";
 import tutorialTemplateUrl from "./../assets/templates/tutorial.spoke";
 
 import { TERMS, PRIVACY } from "../constants";
+import NotificationDialog from "./dialogs/NotificationDialog";
 
 const StyledEditorContainer = styled.div`
   display: flex;
@@ -104,23 +105,43 @@ class EditorContainer extends Component {
     const projectId = match.params.projectId;
     const queryParams = new URLSearchParams(location.search);
 
-    if (projectId === "new") {
-      if (queryParams.has("template")) {
-        this.loadProjectTemplate(queryParams.get("template"));
-      } else if (queryParams.has("sceneId")) {
-        this.loadScene(queryParams.get("sceneId"));
+    const load = () => {
+      if (projectId === "new") {
+        if (queryParams.has("template")) {
+          this.loadProjectTemplate(queryParams.get("template"));
+        } else if (queryParams.has("sceneId")) {
+          this.loadScene(queryParams.get("sceneId"));
+        } else {
+          this.loadProjectTemplate(defaultTemplateUrl);
+        }
+      } else if (projectId === "tutorial") {
+        this.loadProjectTemplate(tutorialTemplateUrl, true);
       } else {
-        this.loadProjectTemplate(defaultTemplateUrl);
+        this.loadProject(projectId);
       }
-    } else if (projectId === "tutorial") {
-      this.loadProjectTemplate(tutorialTemplateUrl, true);
-    } else {
-      this.loadProject(projectId);
-    }
 
-    if (projectId === "tutorial") {
-      trackEvent("Tutorial Start");
-      this.setState({ onboardingContext: { enabled: true } });
+      if (projectId === "tutorial") {
+        trackEvent("Tutorial Start");
+        this.setState({ onboardingContext: { enabled: true } });
+      }
+    };
+
+    const features = {
+      show_global_notification: true,
+      global_notification_body: "COPY HERE",
+      global_notification_link: "https://mozilla.org"
+    };
+    if (features["show_global_notification"]) {
+      this.showDialog(NotificationDialog, {
+        title: "Admin notification",
+        message: features["global_notification_body"],
+        link: features["global_notification_link"],
+        onClosed: load,
+        onConfirm: load,
+        onCancel: null
+      });
+    } else {
+      load();
     }
   }
 

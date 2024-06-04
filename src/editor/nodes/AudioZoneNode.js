@@ -1,8 +1,28 @@
-import { Material, BoxBufferGeometry, Mesh, BoxHelper } from "three";
+import {
+  Material,
+  BoxBufferGeometry,
+  LineSegments,
+  EdgesGeometry,
+  BoxGeometry,
+  SphereGeometry,
+  LineBasicMaterial,
+  Quaternion
+} from "three";
 import AudioParams, { AudioElementType } from "../objects/AudioParams";
 import AudioParamsNode from "./AudioParamsNode";
 
 const requiredProperties = ["enabled", "inOut", "outIn"];
+
+const DEBUG_BBAA_COLOR = 0x49ef4;
+const debugMaterial = new LineBasicMaterial({
+  color: DEBUG_BBAA_COLOR,
+  linewidth: 2
+});
+
+export const AudioZoneShape = Object.freeze({
+  Box: "box",
+  Sphere: "sphere"
+});
 
 export default class AudioZoneNode extends AudioParamsNode(AudioParams) {
   static componentName = "audio-zone";
@@ -35,6 +55,7 @@ export default class AudioZoneNode extends AudioParamsNode(AudioParams) {
     node.enabled = zoneProps.enabled;
     node.inOut = zoneProps.inOut;
     node.outIn = zoneProps.outIn;
+    node.shape = zoneProps.shape || AudioZoneShape.Box;
 
     return node;
   }
@@ -42,15 +63,41 @@ export default class AudioZoneNode extends AudioParamsNode(AudioParams) {
   constructor(editor) {
     super(editor, AudioElementType.AUDIO_ZONE);
 
-    const boxMesh = new Mesh(AudioZoneNode._geometry, AudioZoneNode._material);
-    const box = new BoxHelper(boxMesh, 0x00ff00);
-    box.layers.set(1);
-    this.helper = box;
-    this.add(box);
     this.enabled = true;
     this.inOut = true;
     this.outIn = true;
+    this.shape = AudioZoneShape.Box;
   }
+
+  set shape(shape) {
+    this._shape = shape;
+
+    this.remove(this.helper);
+    let geo;
+    if (shape === AudioZoneShape.Box) {
+      geo = new BoxGeometry();
+    } else {
+      geo = new SphereGeometry();
+    }
+    const debugMesh = new LineSegments(new EdgesGeometry(geo), debugMaterial);
+    debugMesh.layers.set(1);
+    this.helper = debugMesh;
+    this.add(debugMesh);
+    this.matrixAutoUpdate = false;
+  }
+
+  get shape() {
+    return this._shape;
+  }
+
+  onUpdate = (function() {
+    const quat = new Quaternion();
+    return function() {
+      this.quaternion.set(0, 0, 0, 1);
+      this.quaternion.multiply(this.parent.getWorldQuaternion(quat).inverse());
+      this.updateMatrix();
+    };
+  })();
 
   copy(source, recursive = true) {
     if (recursive) {
@@ -70,6 +117,7 @@ export default class AudioZoneNode extends AudioParamsNode(AudioParams) {
     this.enabled = source.enabled;
     this.inOut = source.inOut;
     this.outIn = source.outIn;
+    this._shape = source.shape;
 
     return this;
   }
@@ -79,7 +127,8 @@ export default class AudioZoneNode extends AudioParamsNode(AudioParams) {
       "audio-zone": {
         enabled: this.enabled,
         inOut: this.inOut,
-        outIn: this.outIn
+        outIn: this.outIn,
+        shape: this.shape
       }
     });
   }
@@ -99,7 +148,8 @@ export default class AudioZoneNode extends AudioParamsNode(AudioParams) {
       target: this.gltfIndexForUUID(this.target),
       enabled: this.enabled,
       inOut: this.inOut,
-      outIn: this.outIn
+      outIn: this.outIn,
+      shape: this.shape
     });
   }
 }
